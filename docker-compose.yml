@@ -1,0 +1,72 @@
+version: '3.5'
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    working_dir: /app
+    container_name: sagas-practice
+    restart: unless-stopped
+    tty: true
+    stdin_open: true
+    volumes:
+      - ./:/app
+    ports:
+      - "${APP_PORT:-8080}:80"
+    networks:
+      - diego-network
+
+  mongo:
+    image: "mongo:5.0"
+    container_name: mongo-sagas-practice
+    command: mongod --auth
+    restart: unless-stopped
+    logging:
+      driver: none
+    ports:
+      - "${SERVER_MONGO_DB_EXPOSE_SERVICE:-27017}:${DB_PORT:-27017}"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${DB_USERNAME}
+      - MONGO_INITDB_ROOT_PASSWORD=${DB_PASSWORD}
+    volumes:
+      - 'mongo-data:/data/db'
+      - 'mongo-log:/var/log/mongodb/'
+    networks:
+      - diego-network
+
+  mailhog:
+    image: 'mailhog/mailhog:v1.0.1'
+    container_name: mailhog-sagas-practice
+    restart: unless-stopped
+    ports:
+      - "${MAILHOG_PORT:-1027}:1025"
+      - "${MAILHOG_DASHBOARD_PORT:-8027}:8025"
+    networks:
+      - diego-network
+
+  rabbitmq:
+    image: rabbitmq:3.11-management
+    container_name: rabbit-sagas-practice
+    tty: true
+    ports:
+      - "${RABBITMQ_PORT:-5672}:5672"
+      - "${RABBITMQ_DASHBOARD_PORT:-15672}:15672"
+    environment:
+      RABBITMQ_USER: ${RABBITMQ_USERNAME:-"guest"}
+      RABBITMQ_PASS: ${RABBITMQ_PASSWORD:-"guest"}
+      RABBITMQ_VHOST: ${RABBITMQ_VHOST:-"/"}
+      RABBITMQ_DEFAULT_VHOST: ${RABBITMQ_VHOST:-"/"}
+    networks:
+      - diego-network
+
+volumes:
+  mongo-data:
+    driver: local
+  mongo-log:
+    driver: local
+  rabbitmq-data:
+    driver: local
+    
+networks:
+  diego-network:
+    external: true
