@@ -9,7 +9,14 @@ export default () => ({
         uri: process.env.DB_URI_MONGODB,
     },
     rabbitmq:{
-        uri: process.env.ENQUEUE_DSN
+        uri: process.env.ENQUEUE_DSN,
+        main_exchange: {
+            name: process.env.EXCHANGE_NAME,
+            type: process.env.EXCHANGE_TYPE
+        },
+        main_queues:{
+            name: process.env.QUEUE_NAME
+        }
     },
     mail:{
         host: process.env.MAIL_HOST,

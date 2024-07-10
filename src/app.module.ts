@@ -24,6 +24,7 @@ import * as Joi from 'joi'
               RABBITMQ_PORT: Joi.required(),
               RABBITMQ_VHOST: Joi.required(),
               EXCHANGE_NAME: Joi.required(),
+              EXCHANGE_TYPE: Joi.required(),
               QUEUE_NAME: Joi.required(),
               ENQUEUE_DSN: Joi.required(),
               MAIL_HOST: Joi.required(),

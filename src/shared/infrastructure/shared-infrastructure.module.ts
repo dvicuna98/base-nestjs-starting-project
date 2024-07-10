@@ -17,7 +17,21 @@ import {RabbitMQPublisher} from "./rabbitmq/rabbitmq.publisher";
                 uri: config.get('rabbitmq.uri'),
                 connectionInitOptions:{
                     wait:false
-                }
+                },
+                exchanges:[
+                    {
+                        name: config.get('rabbitmq.main_exchange.name'),
+                        type: config.get('rabbitmq.main_exchange.type'),
+                        createExchangeIfNotExists: true,
+                    }
+                ],
+                queues:[
+                    {
+                        name: config.get('rabbitmq.main_queues.name'),
+                        exchange: config.get('rabbitmq.main_exchange.name'),
+                        createQueueIfNotExists: true,
+                    }
+                ]
             }),
             inject: [ConfigService]
         }),
