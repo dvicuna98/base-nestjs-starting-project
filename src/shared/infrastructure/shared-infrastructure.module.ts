@@ -16,6 +16,32 @@ import {RabbitmqSubscriber} from "./rabbitmq/rabbitmq.subscriber";
                         name: config.get('rabbitmq.main_exchange.name'),
                         type: config.get('rabbitmq.main_exchange.type'),
                         createExchangeIfNotExists: true
+                    },
+                    {
+                        name: config.get('rabbitmq.direct_exchange.name'),
+                        type: config.get('rabbitmq.direct_exchange.type'),
+                        createExchangeIfNotExists: true
+                    }
+                ],
+                queues: [
+                    {
+                        name: config.get('rabbitmq.main_queues.name'),
+                        exchange: config.get('rabbitmq.main_exchange.name'),
+                        createQueueIfNotExists: true
+                    },
+                    {
+                        name: config.get('rabbitmq.retry_queue.name'),
+                        exchange: config.get('rabbitmq.direct_exchange.name'),
+                        createQueueIfNotExists: true,
+                        options: {
+                            deadLetterExchange: config.get('rabbitmq.main_exchange.name'),
+                            messageTtl: 3000
+                        }
+                    },
+                    {
+                        name: config.get('rabbitmq.dead_letter_queue.name'),
+                        exchange: config.get('rabbitmq.direct_exchange.name'),
+                        createQueueIfNotExists: true
                     }
                 ]
             }),

@@ -14,8 +14,20 @@ export default () => ({
             name: process.env.EXCHANGE_NAME,
             type: process.env.EXCHANGE_TYPE
         },
+        direct_exchange:{
+            name: process.env.EXCHANGE_NAME_DIRECT,
+            type: process.env.EXCHANGE_TYPE_DIRECT
+        },
         main_queues:{
             name: process.env.QUEUE_NAME
+        },
+        retry_queue:{
+            name: process.env.QUEUE_NAME_RETRY,
+            binding_key: process.env.DIRECT_BINDING_KEY
+        },
+        dead_letter_queue:{
+            name: process.env.DEAD_LETTER_QUEUE_NAME,
+            binding_key: process.env.DEAD_LETTER_BINDING_KEY
         }
     },
     mail:{
