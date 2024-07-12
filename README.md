@@ -26,6 +26,11 @@
 
 [Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
 
+Base project with: 
+- Mongo configuration
+- Mailing configuration
+- Rabbitmq configuration
+
 ## Installation
 
 ```bash
@@ -56,6 +61,17 @@ $ npm run test:e2e
 
 # test coverage
 $ npm run test:cov
+```
+
+## Build with docker compose
+
+```bash
+# build docker for development
+$ docker compose up --build
+
+# inside container
+$ npm run start:dev
+
 ```
 
 ## Support
