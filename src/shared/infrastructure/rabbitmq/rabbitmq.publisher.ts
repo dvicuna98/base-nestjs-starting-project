@@ -1,20 +1,17 @@
-import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
-import { Injectable } from '@nestjs/common';
-import { IEventPublisher } from '@nestjs/cqrs';
+import {Injectable} from "@nestjs/common";
+import {AmqpConnection} from "@golevelup/nestjs-rabbitmq";
+import {ConfigService} from "@nestjs/config";
+import {PublisherInterface} from "./interfaces/publisher.interface";
 
 @Injectable()
-export class RabbitMQPublisher implements IEventPublisher {
-    constructor(private readonly amqpConnection: AmqpConnection) {}
+export class RabbitmqPublisher implements PublisherInterface{
 
-    connect(): void {
-        // init logic if is neccesary
+    constructor(
+        private readonly amqpConnection: AmqpConnection,
+        private config:ConfigService
+    ) {
     }
 
-    publish<T>(event: T): any {
-        this.amqpConnection.publish(
-            '',
-            event.constructor.name,
-            JSON.stringify(event),
-        );
+    publish() {
     }
 }

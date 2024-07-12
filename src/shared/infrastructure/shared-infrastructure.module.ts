@@ -2,34 +2,20 @@ import {Module, OnModuleInit} from "@nestjs/common";
 import {ApplicationBootstrapOptions} from "../../common/interfaces/application-bootstrap-options.interface";
 import {MailerModule} from "@nestjs-modules/mailer";
 import {ConfigModule, ConfigService} from "@nestjs/config";
-import {CqrsModule, EventBus} from "@nestjs/cqrs";
 import {RabbitMQModule} from "@golevelup/nestjs-rabbitmq";
-import {RabbitMQSubscriber} from "./rabbitmq/rabbitmq.suscriber";
-import { Events } from './rabbitmq/events';
-import {RabbitMQPublisher} from "./rabbitmq/rabbitmq.publisher";
+import {RabbitmqSubscriber} from "./rabbitmq/rabbitmq.subscriber";
 
 @Module({
     imports:[
-        CqrsModule,
         RabbitMQModule.forRootAsync(RabbitMQModule,{
             imports: [ConfigModule],
             useFactory: (config: ConfigService) => ({
                 uri: config.get('rabbitmq.uri'),
-                connectionInitOptions:{
-                    wait:false
-                },
                 exchanges:[
                     {
                         name: config.get('rabbitmq.main_exchange.name'),
                         type: config.get('rabbitmq.main_exchange.type'),
-                        createExchangeIfNotExists: true,
-                    }
-                ],
-                queues:[
-                    {
-                        name: config.get('rabbitmq.main_queues.name'),
-                        exchange: config.get('rabbitmq.main_exchange.name'),
-                        createQueueIfNotExists: true,
+                        createExchangeIfNotExists: true
                     }
                 ]
             }),
@@ -37,29 +23,18 @@ import {RabbitMQPublisher} from "./rabbitmq/rabbitmq.publisher";
         }),
     ],
     providers:[
-        RabbitMQSubscriber,
-        RabbitMQPublisher,
-        {
-            provide: 'EVENTS',
-            useValue: Events,
-        },
+        RabbitmqSubscriber
     ],
     exports:[]
 })
 export class SharedInfrastructureModule implements OnModuleInit{
     constructor(
-        private readonly event$: EventBus,
-        private readonly rbmqSubscriber: RabbitMQSubscriber,
-        private readonly rbmqPublisher: RabbitMQPublisher,
+        private readonly rbmqSubscriber: RabbitmqSubscriber,
     ) {
     }
 
     async onModuleInit(): Promise<any> {
         await this.rbmqSubscriber.connect();
-        this.rbmqSubscriber.bridgeEventsTo(this.event$.subject$);
-
-        await this.rbmqPublisher.connect();
-        this.event$.publisher = this.rbmqPublisher;
     }
 
     static register (options: ApplicationBootstrapOptions){
