@@ -1,7 +1,9 @@
 import {Module, OnModuleInit} from '@nestjs/common';
-import {RabbitMQModule} from "@golevelup/nestjs-rabbitmq";
+import {AmqpConnection, RabbitMQModule} from "@golevelup/nestjs-rabbitmq";
 import {ConfigModule, ConfigService} from "@nestjs/config";
 import {RabbitmqSubscriber} from "./features/rabbitmq.subscriber";
+import {RabbitmqPublisher} from "./features/rabbitmq.publisher";
+import {Channel} from "amqplib";
 
 @Module({
     imports:[
@@ -47,17 +49,51 @@ import {RabbitmqSubscriber} from "./features/rabbitmq.subscriber";
         }),
     ],
     providers:[
-        RabbitmqSubscriber
+        RabbitmqSubscriber,
+        RabbitmqPublisher
     ],
 })
 export class EventBusModule implements OnModuleInit{
+    private readonly exchangeName:string;
+
+    private readonly queueName:string;
+
+    private readonly directExchangeName:string;
+
+    private readonly retryQueueName:string
+
+    private readonly retryBindingKey:string
+
+    private readonly deadLetterQueue:string;
+
+    private readonly deadLetterBindingKey:string;
 
     constructor(
+        private readonly amqpConnection: AmqpConnection,
+        private readonly configService: ConfigService,
         private readonly rbmqSubscriber: RabbitmqSubscriber,
+        private readonly rbmqPublisher: RabbitmqPublisher
     ) {
+        this.exchangeName = this.configService.get('rabbitmq.main_exchange.name');
+        this.queueName = this.configService.get('rabbitmq.main_queues.name');
+        this.directExchangeName = this.configService.get('rabbitmq.direct_exchange.name');
+        this.retryQueueName = this.configService.get('rabbitmq.retry_queue.name');
+        this.deadLetterQueue = this.configService.get('rabbitmq.dead_letter_queue.name');
+        this.retryBindingKey = this.configService.get('rabbitmq.retry_queue.binding_key');
+        this.deadLetterBindingKey = this.configService.get('rabbitmq.dead_letter_queue.binding_key');
     }
 
     async onModuleInit(): Promise<any> {
+        let channel: Channel = this.amqpConnection.channel;
+
+        await channel.bindQueue(this.queueName,this.exchangeName,'');
+
+        await channel.bindQueue(this.retryQueueName,this.directExchangeName,this.retryBindingKey);
+
+        await channel.bindQueue(this.deadLetterQueue,this.directExchangeName,this.deadLetterBindingKey);
+
         await this.rbmqSubscriber.connect();
+
+        await this.rbmqPublisher.publish();
     }
 }
