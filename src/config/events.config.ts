@@ -9,16 +9,31 @@ export default () => ({
         authSource: process.env.DB_AUTHSOURCE,
         uri: process.env.DB_URI_MONGODB,
     },
-    mail:{
-        host: process.env.MAIL_HOST,
-        port: process.env.MAIL_PORT,
-        username: process.env.MAIL_USERNAME,
-        password: process.env.MAIL_PASSWORD,
-        from_address: process.env.MAIL_FROM_ADDRESS
-    }
+    rabbitmq:{
+        uri: process.env.ENQUEUE_DSN,
+        main_exchange: {
+            name: process.env.EXCHANGE_NAME,
+            type: process.env.EXCHANGE_TYPE
+        },
+        direct_exchange:{
+            name: process.env.EXCHANGE_NAME_DIRECT,
+            type: process.env.EXCHANGE_TYPE_DIRECT
+        },
+        main_queues:{
+            name: process.env.QUEUE_NAME
+        },
+        retry_queue:{
+            name: process.env.QUEUE_NAME_RETRY,
+            binding_key: process.env.DIRECT_BINDING_KEY
+        },
+        dead_letter_queue:{
+            name: process.env.DEAD_LETTER_QUEUE_NAME,
+            binding_key: process.env.DEAD_LETTER_BINDING_KEY
+        }
+    },
 });
 
-export function JoiValidationObject() {
+export function JoiValidationObject () {
 
     return Joi.object({
         DB_USERNAME: Joi.required(),
@@ -42,11 +57,5 @@ export function JoiValidationObject() {
         DIRECT_BINDING_KEY: Joi.required(),
         DEAD_LETTER_BINDING_KEY: Joi.required(),
         ENQUEUE_DSN: Joi.required(),
-        MAIL_HOST: Joi.required(),
-        MAIL_PORT: Joi.required(),
-        MAIL_USERNAME: Joi.required(),
-        MAIL_PASSWORD: Joi.required(),
-        MAIL_FROM_ADDRESS: Joi.required(),
     });
 }
-

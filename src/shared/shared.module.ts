@@ -3,9 +3,9 @@ import {SharedInfrastructureModule} from "./infrastructure/shared-infrastructure
 import {ApplicationBootstrapOptions} from "../common/interfaces/application-bootstrap-options.interface";
 
 @Module({
-    imports:[],
-    providers:[],
-    // exports:[SharedInfrastructureModule]
+    imports: [],
+    providers: [],
+    exports: []
 })
 export class SharedModule {
     static register (options: ApplicationBootstrapOptions){

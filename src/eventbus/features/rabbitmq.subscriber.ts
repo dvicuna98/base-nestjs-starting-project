@@ -1,9 +1,8 @@
 import {Injectable, Logger} from "@nestjs/common";
-import {ModuleRef} from "@nestjs/core";
 import {AmqpConnection, Nack} from "@golevelup/nestjs-rabbitmq";
 import {Channel, ConsumeMessage} from "amqplib";
 import {ConfigService} from "@nestjs/config";
-import {WithRetryException} from "./exceptions/with-retry.exception";
+import {WithRetryException} from "../exceptions/with-retry.exception";
 
 @Injectable()
 export class RabbitmqSubscriber{
@@ -25,7 +24,6 @@ export class RabbitmqSubscriber{
     private readonly deadLetterBindingKey:string;
 
     constructor(
-        private moduleRef: ModuleRef,
         private readonly amqpConnection: AmqpConnection,
         private readonly configService: ConfigService
     ) {
@@ -68,7 +66,7 @@ export class RabbitmqSubscriber{
 
                 errorHandler: (channel: Channel, msg: ConsumeMessage, e) => {
 
-                    let counter:number|undefined = msg.properties.headers['retry_counter'];
+                    let counter:number|undefined = msg.properties.headers['redelivery_count'];
 
                     if(counter){
                         counter++;
